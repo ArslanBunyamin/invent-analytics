@@ -5,14 +5,22 @@ import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
-import TablePagination from "@mui/material/TablePagination";
 import TableRow from "@mui/material/TableRow";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import { visuallyHidden } from "@mui/utils";
+import Button from "@mui/material/Button";
+import ButtonGroup from "@mui/material/ButtonGroup";
 import axios from "axios";
+import "./table.scss";
+import { ChevronLeft, ChevronRight } from "@mui/icons-material";
+import SelectYear from "./SelectYear";
+import SearchBar from "./SearchBar";
+import { useSelector } from "react-redux";
+import type { RootState } from "../redux/store";
+import SelectType from "./SelectType";
 
 interface Data {
   name: string;
@@ -160,7 +168,7 @@ function EnhancedTableToolbar() {
         id="tableTitle"
         component="div"
       >
-        Nutrition
+        <b className="title">MOVIES</b>
       </Typography>
     </Toolbar>
   );
@@ -169,27 +177,42 @@ function EnhancedTableToolbar() {
 export default function EnhancedTable() {
   const [order, setOrder] = React.useState<Order>("asc");
   const [orderBy, setOrderBy] = React.useState<keyof Data>("name");
-  const [page, setPage] = React.useState(0);
   const [rows, setrows] = React.useState<Data[]>([]);
+  const [pageNo, setpageNo] = React.useState(1);
+  const [maxPageNo, setmaxPageNo] = React.useState(0);
+  const selectedYear = useSelector((state: RootState) => state.movies.year);
+  const searchText = useSelector((state: RootState) => state.movies.searchText);
+  const selectedType = useSelector((state: RootState) => state.movies.type);
 
   React.useEffect(() => {
+    getMovies();
+  }, [pageNo, selectedYear, searchText, selectedType]);
+
+  const getMovies = () => {
     axios
       .get("http://www.omdbapi.com", {
         params: {
           apikey: "69b9849a",
-          t: "Pokemon",
+          s: searchText,
+          page: pageNo,
+          y: selectedYear,
+          type: selectedType,
         },
       })
       .then((response) => {
+        if (response.data.Response === "False") {
+          setrows([]);
+          return;
+        }
         setrows(() => [
-          createData(
-            response.data.Title,
-            response.data.Year,
-            response.data.imdbID
+          ...response?.data?.Search?.map(
+            (movie: { Title: string; Year: string; imdbID: string }) =>
+              createData(movie.Title, movie.Year, movie.imdbID)
           ),
         ]);
+        setmaxPageNo(() => Math.ceil(response.data.totalResults / 10));
       });
-  });
+  };
 
   const handleRequestSort = (
     event: React.MouseEvent<unknown>,
@@ -200,93 +223,92 @@ export default function EnhancedTable() {
     setOrderBy(property);
   };
 
-  const handleChangePage = (event: unknown, newPage: number) => {
-    setPage(newPage);
-  };
-
   // Avoid a layout jump when reaching the last page with empty rows.
-  const emptyRows = page > 0 ? Math.max(0, (1 + page) * 10 - rows.length) : 0;
 
   const visibleRows = React.useMemo(
-    () =>
-      stableSort(rows, getComparator(order, orderBy)).slice(
-        page * 10,
-        page * 10 + 10
-      ),
-    [order, orderBy, page, rows]
+    () => stableSort(rows, getComparator(order, orderBy)).slice(0, 10),
+    [order, orderBy, rows]
   );
 
   const clickHandler = async (name: string) => {
-    const result = await axios.get("http://www.omdbapi.com", {
-      params: {
-        apikey: "69b9849a",
-        t: "lord of the",
-      },
-    });
-    console.log(result.data);
+    return;
   };
 
   return (
     <Box sx={{ width: "100%" }}>
       <Paper sx={{ width: "100%", mb: 2 }}>
         <EnhancedTableToolbar />
+        <div className="filterCont">
+          <SelectType />
+          <SelectYear />
+          <SearchBar />
+        </div>
         <TableContainer>
-          <Table
-            sx={{ minWidth: 750 }}
-            aria-labelledby="tableTitle"
-            size="medium"
-          >
-            <EnhancedTableHead
-              order={order}
-              orderBy={orderBy}
-              onRequestSort={handleRequestSort}
-              rowCount={rows.length}
-            />
-            <TableBody>
-              {visibleRows.map((row, index) => {
-                return (
-                  <TableRow
-                    hover
-                    role="checkbox"
-                    tabIndex={-1}
-                    key={row.imdbID}
-                    sx={{ cursor: "pointer" }}
-                    onClick={(event) => clickHandler(row.name)}
-                  >
-                    <TableCell padding="checkbox"></TableCell>
-                    <TableCell
-                      component="th"
-                      id={row.imdbID}
-                      scope="row"
-                      padding="none"
+          {!visibleRows.length ? (
+            <h2 className="notFound">There is no such movie...</h2>
+          ) : (
+            <Table
+              sx={{ minWidth: 750 }}
+              aria-labelledby="tableTitle"
+              size="medium"
+            >
+              <EnhancedTableHead
+                order={order}
+                orderBy={orderBy}
+                onRequestSort={handleRequestSort}
+                rowCount={rows.length}
+              />
+              <TableBody>
+                {visibleRows.map((row, index) => {
+                  return (
+                    <TableRow
+                      hover
+                      role="checkbox"
+                      tabIndex={-1}
+                      key={row.imdbID}
+                      sx={{ cursor: "pointer" }}
+                      onClick={(event) => clickHandler(row.name)}
                     >
-                      {row.name}
-                    </TableCell>
-                    <TableCell align="inherit">{row.releaseDate}</TableCell>
-                    <TableCell align="inherit">{row.imdbID}</TableCell>
-                  </TableRow>
-                );
-              })}
-              {emptyRows > 0 && (
-                <TableRow
-                  style={{
-                    height: 53 * emptyRows,
-                  }}
-                >
-                  <TableCell colSpan={6} />
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
+                      <TableCell padding="checkbox"></TableCell>
+                      <TableCell
+                        component="th"
+                        id={row.imdbID}
+                        scope="row"
+                        padding="none"
+                      >
+                        {row.name}
+                      </TableCell>
+                      <TableCell align="inherit">{row.releaseDate}</TableCell>
+                      <TableCell align="inherit">{row.imdbID}</TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          )}
         </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[10]}
-          component="div"
-          count={rows.length}
-          rowsPerPage={10}
-          page={page}
-          onPageChange={handleChangePage}
-        />
+        <div className="pageButtons">
+          <ButtonGroup variant="contained" aria-label="Basic button group">
+            <Button
+              disabled={pageNo === 1}
+              onClick={() => {
+                if (pageNo === 1) return;
+                setpageNo((prev) => prev - 1);
+              }}
+            >
+              <ChevronLeft />
+            </Button>
+            <Button
+              disabled={pageNo === maxPageNo}
+              onClick={() => {
+                if (pageNo === maxPageNo) return;
+                setpageNo((prev) => prev + 1);
+              }}
+            >
+              <ChevronRight />
+            </Button>
+          </ButtonGroup>
+        </div>
       </Paper>
     </Box>
   );

@@ -1,0 +1,25 @@
+.title{
+    font-size: xx-large;
+}
+.pageButtons{
+    padding: 16px;
+    text-align: end;
+    Button{
+        background-color: #ddd;
+        color: black;
+        &:hover{
+            background-color: #bbb;
+        }
+    }
+}
+
+.filterCont{
+    padding: 0 16px;
+    display: flex;
+    justify-content: end;
+    gap: 1rem;
+}
+
+.notFound{
+    margin-top: 3rem;
+}
