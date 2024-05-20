@@ -1,10 +1,10 @@
 import "./App.scss";
-import CustomizedTables from "./components/Table";
+import Table from "./components/Table";
 
 function App() {
   return (
     <div className="App">
-      <CustomizedTables />
+      <Table />
     </div>
   );
 }

@@ -2,7 +2,7 @@ import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { setSearchText } from "../redux/moviesSlice";
+import { setSearchText } from "../redux/filterSlice";
 
 export default function SearchBar() {
   const [searchValue, setsearchValue] = useState("");

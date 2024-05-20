@@ -5,13 +5,26 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import { makeStore } from "./redux/store";
 import { Provider } from "react-redux";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import MoviePage from "./pages/MoviePage";
+
+const router = createBrowserRouter([
+  {
+    path: "/",
+    element: <App />,
+  },
+  {
+    path: "movies/:movieID",
+    element: <MoviePage />,
+  },
+]);
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 root.render(
   <Provider store={makeStore()}>
-    <App />
+    <RouterProvider router={router} />
   </Provider>
 );
 

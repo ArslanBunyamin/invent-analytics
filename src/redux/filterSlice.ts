@@ -1,7 +1,7 @@
 import { createSlice } from '@reduxjs/toolkit'
 
-export const moviesSlice = createSlice({
-    name: 'movies',
+export const filterSlice = createSlice({
+    name: 'filter',
     initialState: {
         year: null,
         searchText: 'Pokemon',
@@ -21,6 +21,6 @@ export const moviesSlice = createSlice({
 })
 
 // Action creators are generated for each case reducer function
-export const { setYear, setSearchText, setType } = moviesSlice.actions
+export const { setYear, setSearchText, setType } = filterSlice.actions
 
-export default moviesSlice.reducer
+export default filterSlice.reducer

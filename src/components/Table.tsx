@@ -21,6 +21,8 @@ import SearchBar from "./SearchBar";
 import { useSelector } from "react-redux";
 import type { RootState } from "../redux/store";
 import SelectType from "./SelectType";
+import { useNavigate } from "react-router-dom";
+import { Movie } from "../types/movieType";
 
 interface Data {
   name: string;
@@ -94,16 +96,16 @@ const headCells: readonly HeadCell[] = [
     label: "Name",
   },
   {
-    id: "imdbID",
-    numeric: false,
-    disablePadding: false,
-    label: "Imdb ID",
-  },
-  {
     id: "releaseDate",
     numeric: false,
     disablePadding: false,
     label: "Release Date",
+  },
+  {
+    id: "imdbID",
+    numeric: false,
+    disablePadding: false,
+    label: "Imdb ID",
   },
 ];
 
@@ -168,7 +170,7 @@ function EnhancedTableToolbar() {
         id="tableTitle"
         component="div"
       >
-        <b className="title">MOVIES</b>
+        <div className="title">MOVIES</div>
       </Typography>
     </Toolbar>
   );
@@ -180,9 +182,10 @@ export default function EnhancedTable() {
   const [rows, setrows] = React.useState<Data[]>([]);
   const [pageNo, setpageNo] = React.useState(1);
   const [maxPageNo, setmaxPageNo] = React.useState(0);
-  const selectedYear = useSelector((state: RootState) => state.movies.year);
-  const searchText = useSelector((state: RootState) => state.movies.searchText);
-  const selectedType = useSelector((state: RootState) => state.movies.type);
+  const selectedYear = useSelector((state: RootState) => state.filter.year);
+  const searchText = useSelector((state: RootState) => state.filter.searchText);
+  const selectedType = useSelector((state: RootState) => state.filter.type);
+  const navigate = useNavigate();
 
   React.useEffect(() => {
     getMovies();
@@ -205,9 +208,8 @@ export default function EnhancedTable() {
           return;
         }
         setrows(() => [
-          ...response?.data?.Search?.map(
-            (movie: { Title: string; Year: string; imdbID: string }) =>
-              createData(movie.Title, movie.Year, movie.imdbID)
+          ...response?.data?.Search?.map((movie: Movie) =>
+            createData(movie.Title, movie.Year, movie.imdbID)
           ),
         ]);
         setmaxPageNo(() => Math.ceil(response.data.totalResults / 10));
@@ -230,8 +232,8 @@ export default function EnhancedTable() {
     [order, orderBy, rows]
   );
 
-  const clickHandler = async (name: string) => {
-    return;
+  const clickHandler = async (imdbID: string) => {
+    navigate(`/movies/${imdbID}`);
   };
 
   return (
@@ -245,7 +247,7 @@ export default function EnhancedTable() {
         </div>
         <TableContainer>
           {!visibleRows.length ? (
-            <h2 className="notFound">There is no such movie...</h2>
+            <h2 className="notFound">There is no such production...</h2>
           ) : (
             <Table
               sx={{ minWidth: 750 }}
@@ -267,7 +269,7 @@ export default function EnhancedTable() {
                       tabIndex={-1}
                       key={row.imdbID}
                       sx={{ cursor: "pointer" }}
-                      onClick={(event) => clickHandler(row.name)}
+                      onClick={(event) => clickHandler(row.imdbID)}
                     >
                       <TableCell padding="checkbox"></TableCell>
                       <TableCell

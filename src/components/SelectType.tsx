@@ -4,7 +4,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import { setType } from "../redux/moviesSlice";
+import { setType } from "../redux/filterSlice";
 import { useDispatch } from "react-redux";
 
 export default function SelectType() {

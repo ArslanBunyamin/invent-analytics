@@ -4,7 +4,7 @@ import InputLabel from "@mui/material/InputLabel";
 import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
-import { setYear } from "../redux/moviesSlice";
+import { setYear } from "../redux/filterSlice";
 import { useDispatch } from "react-redux";
 
 export default function SelectYear() {
