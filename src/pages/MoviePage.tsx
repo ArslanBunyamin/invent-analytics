@@ -10,7 +10,7 @@ export default function MoviePage() {
 
   useEffect(() => {
     axios
-      .get("http://www.omdbapi.com", {
+      .get("https://www.omdbapi.com", {
         params: {
           apikey: "69b9849a",
           i: params.movieID,
